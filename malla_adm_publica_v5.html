@@ -1,0 +1,1212 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Malla — Administración Pública</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Geist+Mono:wght@400;500&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── TOKENS ─────────────────────────────────────────────────────────────────── */
+:root {
+  --bg:       #fafaf8;
+  --surface:  #ffffff;
+  --s2:       #f5f4f0;
+  --border:   #e8e6e1;
+  --border2:  #d4d1ca;
+  --g4:       #9e9a93;
+  --g6:       #6b6760;
+  --ink:      #141412;
+  --accent:   #1a3a5c;
+  --gold:     #c8a96e;
+  --green:    #3d7a5e;
+  --danger:   #c0392b;
+  --topbar:   rgba(250,250,248,.93);
+  --bottombar:rgba(250,250,248,.95);
+  --card:     #ffffff;
+  --card-ok:  #f4faf7;
+  --card-ok-border: #c5e0d4;
+  --card-lock:#f5f4f0;
+  --modal:    #ffffff;
+  --input:    #fafaf8;
+  --sh:  0 4px 16px rgba(0,0,0,.08);
+  --sh2: 0 12px 40px rgba(0,0,0,.12);
+  --shs: 0 1px 3px rgba(0,0,0,.06);
+}
+html.dark {
+  --bg:       #0f1117;
+  --surface:  #1a1d27;
+  --s2:       #20232f;
+  --border:   rgba(255,255,255,.08);
+  --border2:  rgba(255,255,255,.15);
+  --g4:       #6b7fa3;
+  --g6:       #8a9ab5;
+  --ink:      #eef2f8;
+  --accent:   #4a90d9;
+  --gold:     #e8c050;
+  --green:    #50b88a;
+  --danger:   #e07070;
+  --topbar:   rgba(15,17,23,.92);
+  --bottombar:rgba(15,17,23,.93);
+  --card:     #1a1d27;
+  --card-ok:  #182820;
+  --card-ok-border: rgba(80,184,138,.28);
+  --card-lock:#16181f;
+  --modal:    #1a1d27;
+  --input:    #0f1117;
+  --sh:  0 4px 20px rgba(0,0,0,.4);
+  --sh2: 0 12px 40px rgba(0,0,0,.6);
+  --shs: 0 1px 4px rgba(0,0,0,.3);
+}
+
+/* ── BASE ───────────────────────────────────────────────────────────────────── */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:'Geist',sans-serif; font-weight:400;
+  min-height:100vh; -webkit-font-smoothing:antialiased;
+  transition:background .25s,color .2s;
+}
+
+/* ── TOPBAR ─────────────────────────────────────────────────────────────────── */
+.topbar{
+  position:sticky; top:0; z-index:200;
+  background:var(--topbar);
+  backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+  padding:0 28px; height:58px;
+  display:flex; align-items:center; gap:14px;
+  transition:background .25s,border-color .25s;
+}
+.tb-brand h1{
+  font-family:'Playfair Display',serif;
+  font-size:1.1rem; color:var(--accent);
+  letter-spacing:-.01em; line-height:1;
+  transition:color .25s;
+}
+.tb-brand p{
+  font-family:'Geist Mono',monospace;
+  font-size:.55rem; color:var(--g4);
+  letter-spacing:.09em; text-transform:uppercase; margin-top:2px;
+}
+.tb-spacer{flex:1;}
+
+/* Progress ring chip */
+.ring-chip{
+  display:flex; align-items:center; gap:10px;
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:24px; padding:5px 14px 5px 8px;
+  box-shadow:var(--shs); transition:all .25s;
+}
+.ring-chip svg{width:26px;height:26px;transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--border);stroke-width:3;}
+.ring-fg{fill:none;stroke:var(--green);stroke-width:3;stroke-linecap:round;transition:stroke-dashoffset .5s;}
+.chip-pct{font-family:'Geist Mono',monospace;font-size:.78rem;font-weight:500;color:var(--ink);line-height:1;}
+.chip-lbl{font-family:'Geist Mono',monospace;font-size:.52rem;color:var(--g4);letter-spacing:.06em;text-transform:uppercase;}
+
+/* Theme toggle */
+.theme-wrap{display:flex;align-items:center;gap:6px;}
+.t-icon{font-size:.8rem;color:var(--g4);}
+.t-tog{
+  width:38px;height:20px;background:var(--border2);border-radius:10px;
+  border:none;cursor:pointer;position:relative;transition:background .25s;flex-shrink:0;
+}
+.t-tog::after{
+  content:'';position:absolute;left:3px;top:3px;
+  width:14px;height:14px;border-radius:50%;
+  background:var(--g4);transition:transform .25s,background .25s;
+}
+html.dark .t-tog{background:rgba(74,144,217,.4);}
+html.dark .t-tog::after{transform:translateX(18px);background:var(--accent);}
+
+/* Auth button */
+.auth-btn{
+  display:flex;align-items:center;gap:7px;
+  background:var(--accent);color:white;border:none;
+  border-radius:8px;padding:7px 15px;
+  font-family:'Geist',sans-serif;font-size:.73rem;font-weight:500;
+  cursor:pointer;transition:all .2s;white-space:nowrap;
+}
+.auth-btn:hover{filter:brightness(1.12);box-shadow:var(--sh);}
+.auth-btn.logged{background:var(--surface);color:var(--ink);border:1px solid var(--border);}
+.auth-btn.logged:hover{border-color:var(--border2);filter:none;}
+.auth-dot{width:7px;height:7px;border-radius:50%;background:var(--green);}
+
+/* ── AUTH BANNER ────────────────────────────────────────────────────────────── */
+.auth-banner{
+  background:var(--s2);border-bottom:1px solid var(--border);
+  padding:12px 28px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  transition:background .25s,border-color .25s;
+  animation:slideDown .3s ease;
+}
+@keyframes slideDown{from{transform:translateY(-100%);opacity:0;}to{transform:none;opacity:1;}}
+.ab-icon{
+  width:34px;height:34px;background:var(--accent);border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.85rem;flex-shrink:0;transition:background .25s;
+}
+.ab-text{flex:1;}
+.ab-text strong{display:block;font-size:.8rem;font-weight:600;color:var(--accent);margin-bottom:2px;transition:color .25s;}
+.ab-text p{font-size:.7rem;color:var(--g6);line-height:1.4;}
+.ab-btns{display:flex;gap:8px;}
+.btn-pri{background:var(--accent);color:white;border:none;border-radius:7px;padding:7px 16px;font-family:'Geist',sans-serif;font-size:.72rem;font-weight:500;cursor:pointer;transition:all .2s;}
+.btn-pri:hover{filter:brightness(1.12);}
+.btn-ghost{background:transparent;color:var(--g6);border:1px solid var(--border2);border-radius:7px;padding:7px 13px;font-family:'Geist',sans-serif;font-size:.72rem;cursor:pointer;transition:all .2s;}
+.btn-ghost:hover{background:var(--surface);color:var(--ink);}
+
+/* ── CONTROLS ───────────────────────────────────────────────────────────────── */
+.controls{
+  padding:10px 28px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  border-bottom:1px solid var(--border);background:var(--surface);
+  transition:background .25s,border-color .25s;
+}
+.ctrl{
+  font-family:'Geist Mono',monospace;font-size:.62rem;
+  letter-spacing:.05em;text-transform:uppercase;
+  background:var(--s2);border:1px solid var(--border);
+  color:var(--g6);padding:6px 12px;border-radius:6px;
+  cursor:pointer;transition:all .15s;white-space:nowrap;
+}
+.ctrl:hover{background:var(--bg);color:var(--ink);border-color:var(--border2);}
+.ctrl.on{background:var(--accent);color:white;border-color:var(--accent);}
+.ctrl-sep{width:1px;height:16px;background:var(--border);}
+.ctrl-spacer{flex:1;}
+.stats-row{display:flex;gap:18px;font-family:'Geist Mono',monospace;font-size:.62rem;color:var(--g4);}
+.stats-row b{color:var(--ink);font-weight:500;}
+
+/* ── MALLA ──────────────────────────────────────────────────────────────────── */
+.malla-outer{overflow-x:auto;padding:22px 20px 100px;}
+.malla-inner{min-width:fit-content;}
+
+/* Sem headers row */
+.sem-headers{display:flex;margin-bottom:12px;padding-left:22px;}
+.sem-hdr{
+  min-width:158px;flex:1;text-align:center;
+  padding:0 5px 10px;border-bottom:2px solid;margin:0 3px;
+}
+.sem-hdr-num{font-family:'Playfair Display',serif;font-size:1.35rem;font-weight:700;line-height:1;}
+.sem-hdr-sub{font-family:'Geist Mono',monospace;font-size:.5rem;color:var(--g4);letter-spacing:.08em;text-transform:uppercase;margin-top:2px;}
+.ciclo-chip{
+  display:inline-block;font-family:'Geist Mono',monospace;font-size:.47rem;
+  letter-spacing:.1em;text-transform:uppercase;padding:2px 8px;border-radius:20px;margin-bottom:5px;
+}
+.ciclo-1{background:#e8f0f8;color:#3a6a9e;}
+.ciclo-2{background:#f0ebe8;color:#9e6a3a;}
+html.dark .ciclo-1{background:rgba(74,144,217,.15);color:#7bb5e8;}
+html.dark .ciclo-2{background:rgba(200,160,80,.12);color:#e8c878;}
+
+/* Area rows */
+.area-row{display:flex;margin-bottom:3px;align-items:stretch;}
+.area-label{
+  writing-mode:vertical-rl;text-orientation:mixed;transform:rotate(180deg);
+  font-family:'Geist Mono',monospace;font-size:.47rem;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--g4);
+  padding:8px 4px;border-right:1.5px solid;
+  min-width:22px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+}
+.area-cols{display:flex;flex:1;}
+.sem-col{min-width:158px;flex:1;display:flex;flex-direction:column;gap:4px;padding:0 3px 8px;}
+
+/* ── RAMO CARD ──────────────────────────────────────────────────────────────── */
+.ramo{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:10px;padding:10px 12px;
+  cursor:pointer;position:relative;
+  user-select:none;min-height:62px;
+  display:flex;flex-direction:column;justify-content:space-between;
+  box-shadow:var(--shs);overflow:hidden;
+  transition:box-shadow .15s,transform .15s,border-color .15s,background .25s,opacity .2s;
+  animation:fadeUp .3s ease both;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+
+.ramo:hover:not(.locked){
+  box-shadow:var(--sh);transform:translateY(-2px);border-color:var(--border2);
+}
+.ramo.aprobado{background:var(--card-ok);border-color:var(--card-ok-border);}
+.ramo.aprobado .ramo-nombre{text-decoration:line-through;color:var(--g4);}
+.ramo.locked{background:var(--card-lock);opacity:.42;cursor:not-allowed;box-shadow:none;}
+
+/* Colour strip left */
+.ramo-strip{position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:3px 0 0 3px;}
+
+/* Check badge */
+.ramo-check{
+  position:absolute;top:8px;right:9px;
+  width:17px;height:17px;border-radius:50%;
+  background:var(--green);
+  display:none;align-items:center;justify-content:center;
+  font-size:.58rem;color:white;font-weight:700;
+}
+.ramo.aprobado .ramo-check{display:flex;}
+
+/* Highlight modes */
+.ramo.sel{outline:2px solid var(--accent);outline-offset:2px;transform:translateY(-2px);box-shadow:0 0 0 4px rgba(74,144,217,.14),var(--sh);}
+.ramo.prereq{outline:2px solid var(--green);outline-offset:2px;box-shadow:0 0 0 4px rgba(61,122,94,.12);}
+.ramo.unlocks{outline:2px solid var(--gold);outline-offset:2px;box-shadow:0 0 0 4px rgba(200,169,110,.14);}
+
+.ramo-sigla{font-family:'Geist Mono',monospace;font-size:.51rem;color:var(--g4);letter-spacing:.06em;margin-bottom:3px;}
+.ramo-nombre{font-size:.71rem;font-weight:500;color:var(--ink);line-height:1.33;}
+.ramo-foot{display:flex;justify-content:space-between;align-items:center;margin-top:5px;}
+.ramo-cat{font-family:'Geist Mono',monospace;font-size:.49rem;letter-spacing:.05em;text-transform:uppercase;color:var(--g4);}
+.lock-badge{font-family:'Geist Mono',monospace;font-size:.49rem;color:var(--g4);}
+.tag{font-family:'Geist Mono',monospace;font-size:.47rem;letter-spacing:.04em;text-transform:uppercase;padding:2px 5px;border-radius:4px;}
+.tag-ele{background:#f0eef8;color:#7c5cbf;border:1px solid #d9d0f0;}
+.tag-cer{background:#fdf6e8;color:#b8881e;border:1px solid #f0dfa8;}
+html.dark .tag-ele{background:rgba(124,92,191,.15);color:#c4a8ef;border-color:rgba(124,92,191,.3);}
+html.dark .tag-cer{background:rgba(232,192,80,.1);color:#e8c878;border-color:rgba(232,192,80,.3);}
+
+/* ── PANEL ──────────────────────────────────────────────────────────────────── */
+.panel{
+  position:fixed;right:0;top:58px;bottom:0;width:310px;
+  background:var(--surface);border-left:1px solid var(--border);
+  padding:26px 22px;z-index:150;
+  transform:translateX(100%);transition:transform .25s ease,background .25s,border-color .25s;
+  overflow-y:auto;display:flex;flex-direction:column;gap:18px;
+  box-shadow:-6px 0 28px rgba(0,0,0,.07);
+}
+.panel.open{transform:translateX(0);}
+.panel-x{
+  position:absolute;top:14px;right:14px;
+  background:var(--s2);border:none;width:27px;height:27px;
+  border-radius:6px;cursor:pointer;color:var(--g6);
+  font-size:.82rem;display:flex;align-items:center;justify-content:center;
+  transition:background .15s;
+}
+.panel-x:hover{background:var(--border);}
+.panel-sigla{font-family:'Geist Mono',monospace;font-size:.58rem;color:var(--g4);letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px;}
+.panel h2{font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--ink);line-height:1.3;padding-right:26px;}
+.panel-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  font-family:'Geist Mono',monospace;font-size:.56rem;letter-spacing:.06em;text-transform:uppercase;
+  padding:4px 10px;border-radius:20px;margin-top:7px;border:1px solid;
+}
+.panel-sec-title{
+  font-family:'Geist Mono',monospace;font-size:.56rem;color:var(--g4);
+  letter-spacing:.1em;text-transform:uppercase;
+  border-bottom:1px solid var(--border);padding-bottom:5px;margin-bottom:7px;
+  transition:border-color .25s;
+}
+.panel-pill{
+  background:var(--s2);border:1px solid var(--border);border-radius:7px;
+  padding:7px 11px;font-size:.71rem;color:var(--ink);
+  display:flex;align-items:center;gap:7px;margin-bottom:4px;
+  transition:background .25s,border-color .25s;
+}
+.p-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.p-done{margin-left:auto;font-size:.63rem;color:var(--green);font-weight:600;}
+.panel-btn{
+  width:100%;border-radius:8px;border:none;padding:11px;
+  font-family:'Geist',sans-serif;font-size:.76rem;font-weight:600;
+  cursor:pointer;transition:all .2s;margin-top:auto;
+}
+.panel-btn-ok{background:var(--green);color:white;}
+.panel-btn-ok:hover{filter:brightness(1.1);}
+.panel-btn-un{background:#fef2f2;color:var(--danger);border:1px solid #fca5a5;}
+.panel-btn-un:hover{background:#fee2e2;}
+html.dark .panel-btn-un{background:rgba(192,57,43,.12);color:#e07070;border-color:rgba(192,57,43,.3);}
+.panel-btn-lock{background:var(--s2);color:var(--g4);cursor:not-allowed;border:1px solid var(--border);}
+
+/* ── MODAL ──────────────────────────────────────────────────────────────────── */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(20,20,18,.45);
+  backdrop-filter:blur(4px);z-index:500;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .2s;
+}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal{
+  background:var(--modal);border:1px solid var(--border);
+  border-radius:16px;padding:34px;width:400px;
+  max-width:calc(100vw - 28px);box-shadow:var(--sh2);
+  transform:translateY(14px);transition:transform .22s ease,background .25s,border-color .25s;
+}
+.modal-overlay.open .modal{transform:translateY(0);}
+.modal h2{font-family:'Playfair Display',serif;font-size:1.4rem;color:var(--ink);margin-bottom:6px;}
+.modal p{font-size:.78rem;color:var(--g6);line-height:1.6;margin-bottom:22px;}
+.modal-tabs{display:flex;gap:4px;background:var(--s2);border-radius:8px;padding:4px;margin-bottom:18px;}
+.m-tab{
+  flex:1;font-family:'Geist',sans-serif;font-size:.72rem;font-weight:500;
+  background:none;border:none;border-radius:6px;padding:8px;
+  cursor:pointer;color:var(--g6);transition:all .15s;
+}
+.m-tab.active{background:var(--surface);color:var(--ink);box-shadow:var(--shs);}
+.m-form{display:flex;flex-direction:column;gap:12px;}
+.m-field{display:flex;flex-direction:column;gap:4px;}
+.m-field label{font-family:'Geist Mono',monospace;font-size:.58rem;letter-spacing:.07em;text-transform:uppercase;color:var(--g6);}
+.m-field input{
+  background:var(--input);border:1px solid var(--border);border-radius:8px;
+  padding:10px 13px;font-family:'Geist',sans-serif;font-size:.8rem;
+  color:var(--ink);outline:none;width:100%;
+  transition:border-color .15s,background .25s;
+}
+.m-field input:focus{border-color:var(--accent);background:var(--surface);}
+.m-submit{
+  background:var(--accent);color:white;border:none;border-radius:8px;
+  padding:12px;font-family:'Geist',sans-serif;font-size:.8rem;font-weight:600;
+  cursor:pointer;transition:all .2s;margin-top:4px;
+}
+.m-submit:hover{filter:brightness(1.12);}
+.m-skip{text-align:center;margin-top:10px;}
+.m-skip button{
+  background:none;border:none;font-family:'Geist',sans-serif;
+  font-size:.7rem;color:var(--g4);cursor:pointer;
+  text-decoration:underline;text-decoration-color:var(--border2);
+}
+.m-skip button:hover{color:var(--g6);}
+.m-err{
+  background:#fef2f2;border:1px solid #fca5a5;color:var(--danger);
+  border-radius:7px;padding:9px 13px;font-size:.72rem;display:none;
+}
+html.dark .m-err{background:rgba(192,57,43,.12);border-color:rgba(192,57,43,.3);color:#e07070;}
+.modal-x{
+  position:absolute;top:14px;right:14px;
+  background:var(--s2);border:none;width:27px;height:27px;border-radius:6px;
+  cursor:pointer;color:var(--g6);font-size:.8rem;
+  display:flex;align-items:center;justify-content:center;
+}
+.modal{position:relative;}
+
+/* ── BOTTOM BAR ─────────────────────────────────────────────────────────────── */
+.bottom-bar{
+  position:fixed;bottom:0;left:0;right:0;
+  background:var(--bottombar);backdrop-filter:blur(12px);
+  border-top:1px solid var(--border);
+  padding:10px 28px;display:flex;gap:16px;flex-wrap:wrap;align-items:center;
+  z-index:100;transition:background .25s,border-color .25s;
+}
+.leg-group{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+.leg-sep{width:1px;height:14px;background:var(--border);}
+.leg-item{display:flex;align-items:center;gap:5px;font-family:'Geist Mono',monospace;font-size:.56rem;color:var(--g4);}
+.leg-line{width:16px;height:2px;border-radius:1px;}
+.leg-dot{width:9px;height:9px;border-radius:50%;border:1.5px solid;}
+
+/* ── TOOLTIP ────────────────────────────────────────────────────────────────── */
+.tooltip{
+  position:fixed;
+  background:rgba(20,20,18,.72);   /* menos opaco */
+  backdrop-filter:blur(6px);
+  -webkit-backdrop-filter:blur(6px);
+  color:#eef2f8;
+  padding:6px 10px;               /* más pequeño */
+  border-radius:7px;
+  border:1px solid rgba(255,255,255,.08);
+  font-family:'Geist',sans-serif;font-size:.63rem;line-height:1.45;
+  pointer-events:none;z-index:999;
+  opacity:0;transition:opacity .12s;
+  max-width:190px;
+  box-shadow:0 4px 16px rgba(0,0,0,.18);
+}
+html.dark .tooltip{
+  background:rgba(10,12,18,.75);
+  border-color:rgba(255,255,255,.1);
+}
+.tooltip.vis{opacity:1;}
+.tooltip strong{display:block;font-weight:600;margin-bottom:1px;font-size:.65rem;}
+.tooltip small{opacity:.5;font-size:.58rem;}
+
+/* ── RESPONSIVE — DESKTOP ───────────────────────────────────────────────────── */
+@media(max-width:768px){
+  /* ocultar vista desktop */
+  .malla-outer { display:none; }
+  .bottom-bar  { display:none; }
+
+  /* ajustes topbar */
+  .topbar { padding:0 14px; gap:8px; height:52px; }
+  .tb-brand h1 { font-size:.95rem; }
+  .ring-chip { padding:4px 10px 4px 7px; }
+  .chip-pct { font-size:.72rem; }
+  .chip-lbl { display:none; }
+  .auth-banner { padding:10px 14px; }
+  .controls { padding:9px 14px; gap:6px; }
+  .stats-row { display:none; }
+
+  /* panel ocupa toda la pantalla */
+  .panel { width:100%; top:52px; }
+
+  /* vista móvil visible */
+  .mobile-view { display:block !important; }
+}
+
+/* ── MOBILE VIEW ────────────────────────────────────────────────────────────── */
+.mobile-view {
+  display:none;   /* hidden on desktop */
+  padding:14px 14px 110px;
+}
+
+/* Sem accordion */
+.mob-sem {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:12px;
+  margin-bottom:10px;
+  overflow:hidden;
+  transition:background .25s,border-color .25s;
+  box-shadow:var(--shs);
+}
+.mob-sem-header {
+  display:flex;align-items:center;gap:12px;
+  padding:13px 16px;cursor:pointer;user-select:none;
+}
+.mob-sem-num {
+  font-family:'Playfair Display',serif;
+  font-size:1.3rem;font-weight:700;line-height:1;
+  min-width:28px;
+}
+.mob-sem-info { flex:1; }
+.mob-sem-title {
+  font-size:.78rem;font-weight:600;color:var(--ink);
+}
+.mob-sem-sub {
+  font-family:'Geist Mono',monospace;
+  font-size:.52rem;color:var(--g4);
+  letter-spacing:.06em;text-transform:uppercase;margin-top:2px;
+}
+.mob-sem-pill {
+  font-family:'Geist Mono',monospace;font-size:.52rem;
+  padding:3px 9px;border-radius:12px;
+  background:var(--s2);color:var(--g4);border:1px solid var(--border);
+  white-space:nowrap;
+}
+.mob-sem-pill.all-done {
+  background:rgba(61,122,94,.12);
+  color:var(--green);border-color:rgba(61,122,94,.3);
+}
+.mob-sem-toggle {
+  font-size:.6rem;color:var(--g4);
+  transition:transform .3s;flex-shrink:0;
+}
+.mob-sem.collapsed .mob-sem-toggle { transform:rotate(-90deg); }
+
+.mob-sem-body {
+  overflow:hidden;transition:max-height .35s ease;
+  border-top:1px solid var(--border);
+}
+.mob-sem.collapsed .mob-sem-body { max-height:0 !important; border-top:none; }
+
+/* Ramo rows inside mobile sem */
+.mob-ramo {
+  display:flex;align-items:center;gap:12px;
+  padding:11px 16px;
+  border-bottom:1px solid var(--border);
+  cursor:pointer;transition:background .12s;
+  position:relative;
+}
+.mob-ramo:last-child { border-bottom:none; }
+.mob-ramo:hover:not(.mob-locked) { background:var(--s2); }
+.mob-ramo.mob-locked { opacity:.4;cursor:not-allowed; }
+.mob-ramo.mob-done .mob-ramo-name { text-decoration:line-through;color:var(--g4); }
+
+.mob-strip {
+  width:4px;height:38px;border-radius:2px;flex-shrink:0;
+}
+.mob-ramo-info { flex:1;min-width:0; }
+.mob-ramo-sigla {
+  font-family:'Geist Mono',monospace;
+  font-size:.5rem;color:var(--g4);letter-spacing:.06em;margin-bottom:2px;
+}
+.mob-ramo-name {
+  font-size:.75rem;font-weight:500;color:var(--ink);
+  line-height:1.3;
+}
+.mob-ramo-cat {
+  font-family:'Geist Mono',monospace;
+  font-size:.49rem;text-transform:uppercase;letter-spacing:.04em;
+  margin-top:2px;
+}
+.mob-ramo-right { display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0; }
+.mob-check {
+  width:22px;height:22px;border-radius:50%;
+  border:1.5px solid var(--border2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:.65rem;color:transparent;
+  transition:all .15s;flex-shrink:0;
+}
+.mob-ramo.mob-done .mob-check {
+  background:var(--green);border-color:var(--green);
+  color:white;font-weight:700;
+}
+.mob-lock-icon { font-size:.65rem;color:var(--g4); }
+
+/* Mobile bottom bar (fixed) */
+.mob-bottom {
+  display:none;
+  position:fixed;bottom:0;left:0;right:0;
+  background:var(--bottombar);backdrop-filter:blur(12px);
+  border-top:1px solid var(--border);
+  padding:10px 16px;
+  z-index:100;
+  flex-direction:column;gap:6px;
+  transition:background .25s,border-color .25s;
+}
+@media(max-width:768px){
+  .mob-bottom { display:flex; }
+}
+.mob-progress-bar {
+  height:5px;background:var(--s2);border-radius:3px;overflow:hidden;
+}
+.mob-progress-fill {
+  height:100%;
+  background:linear-gradient(90deg,var(--accent),var(--green));
+  border-radius:3px;transition:width .4s;
+}
+.mob-bottom-stats {
+  display:flex;justify-content:space-between;align-items:center;
+}
+.mob-stat {
+  font-family:'Geist Mono',monospace;font-size:.6rem;color:var(--g4);
+}
+.mob-stat b { color:var(--ink);font-weight:500; }
+.mob-ctrl-row { display:flex;gap:6px; }
+.mob-ctrl {
+  flex:1;font-family:'Geist Mono',monospace;
+  font-size:.58rem;letter-spacing:.04em;text-transform:uppercase;
+  background:var(--s2);border:1px solid var(--border);
+  color:var(--g6);padding:7px 10px;border-radius:7px;
+  cursor:pointer;transition:all .15s;text-align:center;
+}
+.mob-ctrl:hover { background:var(--border);color:var(--ink); }
+.mob-ctrl.on { background:var(--accent);color:white;border-color:var(--accent); }
+</style>
+</head>
+<body>
+
+<!-- ── TOPBAR ── -->
+<div class="topbar">
+  <div class="tb-brand">
+    <h1>Malla Interactiva</h1>
+    <p>Administración Pública</p>
+  </div>
+  <div class="tb-spacer"></div>
+  <div class="ring-chip">
+    <svg viewBox="0 0 26 26">
+      <circle class="ring-bg" cx="13" cy="13" r="10"/>
+      <circle class="ring-fg" id="ring-fg" cx="13" cy="13" r="10"
+        stroke-dasharray="62.83" stroke-dashoffset="62.83"/>
+    </svg>
+    <div>
+      <div class="chip-pct" id="top-pct">0%</div>
+      <div class="chip-lbl" id="top-lbl">0 / 0 ramos</div>
+    </div>
+  </div>
+  <div class="theme-wrap">
+    <span class="t-icon">☀️</span>
+    <button class="t-tog" onclick="toggleTheme()"></button>
+    <span class="t-icon">🌙</span>
+  </div>
+  <button class="auth-btn" id="auth-btn" onclick="handleAuthBtn()">
+    <span>☁</span> Guardar avance
+  </button>
+</div>
+
+<!-- ── AUTH BANNER ── -->
+<div class="auth-banner" id="auth-banner">
+  <div class="ab-icon">☁</div>
+  <div class="ab-text">
+    <strong>Guarda tu avance en la nube</strong>
+    <p>Crea una cuenta gratis para sincronizar tu progreso desde cualquier dispositivo.</p>
+  </div>
+  <div class="ab-btns">
+    <button class="btn-pri" onclick="openModal()">Crear cuenta</button>
+    <button class="btn-ghost" onclick="dismissBanner()">Ahora no</button>
+  </div>
+</div>
+
+<!-- ── CONTROLS ── -->
+<div class="controls">
+  <button class="ctrl" id="btn-prereq" onclick="togglePrereqMode()">🔗 Prerrequisitos</button>
+  <div class="ctrl-sep"></div>
+  <button class="ctrl" onclick="aprobarSemestre()">✓ Aprobar semestre</button>
+  <button class="ctrl" onclick="resetAll()">↺ Reiniciar</button>
+  <div class="ctrl-spacer"></div>
+  <div class="stats-row">
+    <span><b id="s-done">0</b> aprobados</span>
+    <span><b id="s-avail">0</b> disponibles</span>
+    <span><b id="s-lock">0</b> bloqueados</span>
+  </div>
+</div>
+
+<!-- ── MALLA DESKTOP ── -->
+<div class="malla-outer">
+  <div class="malla-inner" id="malla"></div>
+</div>
+
+<!-- ── MALLA MÓVIL ── -->
+<div class="mobile-view" id="mobile-view"></div>
+
+<!-- ── MOBILE BOTTOM BAR ── -->
+<div class="mob-bottom">
+  <div class="mob-progress-bar">
+    <div class="mob-progress-fill" id="mob-fill" style="width:0%"></div>
+  </div>
+  <div class="mob-bottom-stats">
+    <span class="mob-stat"><b id="mob-done">0</b> aprobados</span>
+    <span class="mob-stat"><b id="mob-avail">0</b> disponibles</span>
+    <span class="mob-stat"><b id="mob-pct">0%</b></span>
+  </div>
+  <div class="mob-ctrl-row">
+    <button class="mob-ctrl" id="mob-btn-prereq" onclick="togglePrereqMode()">🔗 Prerreqs</button>
+    <button class="mob-ctrl" onclick="aprobarSemestre()">✓ Aprobar sem.</button>
+    <button class="mob-ctrl" onclick="resetAll()">↺</button>
+  </div>
+</div>
+
+<!-- ── PANEL ── -->
+<div class="panel" id="panel">
+  <button class="panel-x" onclick="closePanel()">✕</button>
+  <div>
+    <div class="panel-sigla" id="p-sigla"></div>
+    <h2 id="p-nombre"></h2>
+    <div class="panel-badge" id="p-badge"></div>
+  </div>
+  <div>
+    <div class="panel-sec-title">Prerrequisitos</div>
+    <div id="p-prereqs"></div>
+  </div>
+  <div>
+    <div class="panel-sec-title">Desbloquea</div>
+    <div id="p-desbloquea"></div>
+  </div>
+  <button class="panel-btn" id="p-btn" onclick="toggleFromPanel()"></button>
+</div>
+
+<!-- ── MODAL ── -->
+<div class="modal-overlay" id="modal-overlay" onclick="overlayClick(event)">
+  <div class="modal">
+    <button class="modal-x" onclick="closeModal()">✕</button>
+    <h2>Bienvenido</h2>
+    <p>Crea una cuenta o inicia sesión para guardar tu avance en la nube y acceder desde cualquier dispositivo.</p>
+    <div class="modal-tabs">
+      <button class="m-tab active" id="tab-login" onclick="switchTab('login')">Iniciar sesión</button>
+      <button class="m-tab" id="tab-reg" onclick="switchTab('reg')">Crear cuenta</button>
+    </div>
+    <div class="m-form">
+      <div class="m-err" id="m-err"></div>
+      <div class="m-field">
+        <label>Correo electrónico</label>
+        <input type="email" id="m-email" placeholder="tu@correo.cl" autocomplete="email"/>
+      </div>
+      <div class="m-field">
+        <label>Contraseña</label>
+        <input type="password" id="m-pass" placeholder="••••••••" autocomplete="current-password"/>
+      </div>
+      <button class="m-submit" id="m-submit" onclick="handleAuth()">Iniciar sesión</button>
+    </div>
+    <div class="m-skip">
+      <button onclick="dismissBanner();closeModal()">Continuar sin cuenta — solo guardar en este navegador</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── BOTTOM BAR ── -->
+<div class="bottom-bar" id="bottom-bar"></div>
+
+<!-- ── TOOLTIP ── -->
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+// ── SUPABASE (reemplaza con tus credenciales) ─────────────────────────────────
+const SUPABASE_URL = 'TU_SUPABASE_URL';
+const SUPABASE_KEY = 'TU_SUPABASE_ANON_KEY';
+let supabase = null;
+
+async function initSupabase() {
+  if (SUPABASE_URL === 'TU_SUPABASE_URL') return;
+  try {
+    const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm');
+    supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) { updateAuthUI(session.user.email); await loadCloud(session.user.id); }
+  } catch(e) { console.warn('Supabase:', e); }
+}
+async function loadCloud(uid) {
+  if (!supabase) return;
+  const { data } = await supabase.from('avance').select('approved').eq('user_id', uid).single();
+  if (data?.approved) { approved = new Set(data.approved); render(); }
+}
+async function saveCloud() {
+  if (!supabase) return;
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return;
+  await supabase.from('avance').upsert({ user_id: session.user.id, approved: [...approved], updated_at: new Date().toISOString() });
+}
+
+// ── ESTADO ───────────────────────────────────────────────────────────────────
+let DATA = null;
+let approved = new Set();
+let selectedId = null;
+let prereqMode = false;
+
+const SEM_COLORS = {
+  1:'#1a3a5c',2:'#234d7a',3:'#1f6b4a',4:'#267a56',
+  5:'#8b4e1a',6:'#a65e22',7:'#5a2d8a',8:'#6b3a9e',9:'#8a1a3a',10:'#c8a96e'
+};
+
+// ── LOAD ─────────────────────────────────────────────────────────────────────
+async function loadData() {
+  try {
+    const res = await fetch('./data_AP.json');
+    DATA = await res.json();
+  } catch(e) { DATA = FALLBACK; }
+  approved = new Set(JSON.parse(localStorage.getItem('malla_v5') || '[]'));
+  await initSupabase();
+  buildBottomBar();
+  render();
+}
+
+// ── HELPERS ──────────────────────────────────────────────────────────────────
+function allRamos() {
+  const out = [];
+  for (let s = 1; s <= DATA.semestres; s++) {
+    (DATA.ramos['s'+s] || []).forEach(r => {
+      out.push({ nombre:r[0], sigla:r[1], cat:r[2], prereqs:r[3]||[], sem:s });
+    });
+  }
+  return out;
+}
+function getRamo(sigla) { return allRamos().find(r => r.sigla === sigla); }
+function getDeps(sigla) { return allRamos().filter(r => r.prereqs.includes(sigla)).map(r => r.sigla); }
+function isUnlocked(ramo) { return ramo.prereqs.every(p => approved.has(p)); }
+function getArea(cat) {
+  if (['ELE','CER'].includes(cat)) return 'electiva';
+  if (['ECO','BAS','MET'].includes(cat)) return 'basica';
+  return 'disciplinar';
+}
+function save() {
+  localStorage.setItem('malla_v5', JSON.stringify([...approved]));
+  saveCloud();
+}
+
+// ── STATS ─────────────────────────────────────────────────────────────────────
+function updateStats() {
+  const ramos = allRamos();
+  const total = ramos.length;
+  const done  = approved.size;
+  const avail = ramos.filter(r => !approved.has(r.sigla) && isUnlocked(r)).length;
+  const lock  = ramos.filter(r => !approved.has(r.sigla) && !isUnlocked(r)).length;
+  const pct   = total ? Math.round(done/total*100) : 0;
+
+  document.getElementById('top-pct').textContent = pct+'%';
+  document.getElementById('top-lbl').textContent = done+' / '+total+' ramos';
+  document.getElementById('s-done').textContent  = done;
+  document.getElementById('s-avail').textContent = avail;
+  document.getElementById('s-lock').textContent  = lock;
+
+  const circ = 2 * Math.PI * 10; // r=10 → 62.83
+  document.getElementById('ring-fg').style.strokeDashoffset = circ - (pct/100)*circ;
+}
+
+// ── BOTTOM BAR ───────────────────────────────────────────────────────────────
+function buildBottomBar() {
+  const bar = document.getElementById('bottom-bar');
+  bar.innerHTML = '';
+
+  const g1 = document.createElement('div'); g1.className = 'leg-group';
+  Object.entries(DATA.categorias).forEach(([,v]) => {
+    const el = document.createElement('div'); el.className = 'leg-item';
+    el.innerHTML = `<div class="leg-line" style="background:${v.color}"></div>${v.nombre}`;
+    g1.appendChild(el);
+  });
+  bar.appendChild(g1);
+
+  const sep = document.createElement('div'); sep.className = 'leg-sep'; bar.appendChild(sep);
+
+  const g2 = document.createElement('div'); g2.className = 'leg-group';
+  [['Aprobado','#3d7a5e'],['Disponible','#1a3a5c'],['Prerreq.','#3d7a5e'],['Desbloquea','#c8a96e'],['Bloqueado','#9e9a93']].forEach(([lbl,col]) => {
+    const el = document.createElement('div'); el.className = 'leg-item';
+    el.innerHTML = `<div class="leg-dot" style="background:${col}20;border-color:${col}"></div>${lbl}`;
+    g2.appendChild(el);
+  });
+  bar.appendChild(g2);
+}
+
+// ── RENDER MÓVIL ──────────────────────────────────────────────────────────────
+function renderMobile() {
+  const container = document.getElementById('mobile-view');
+  container.innerHTML = '';
+
+  for (let s = 1; s <= DATA.semestres; s++) {
+    const ramosS = (DATA.ramos['s'+s] || []);
+    if (!ramosS.length) continue;
+
+    const doneCount  = ramosS.filter(r => approved.has(r[1])).length;
+    const allDone    = doneCount === ramosS.length;
+    const semColor   = SEM_COLORS[s];
+
+    const semEl = document.createElement('div');
+    semEl.className = 'mob-sem';
+
+    // Header
+    const hdr = document.createElement('div');
+    hdr.className = 'mob-sem-header';
+    hdr.innerHTML = `
+      <div class="mob-sem-num" style="color:${semColor}">${s}°</div>
+      <div class="mob-sem-info">
+        <div class="mob-sem-title">Semestre ${s} · <span style="font-size:.65rem;opacity:.6">Ciclo ${s<=8?1:2}</span></div>
+        <div class="mob-sem-sub">${doneCount} / ${ramosS.length} ramos</div>
+      </div>
+      <div class="mob-sem-pill ${allDone?'all-done':''}">${allDone ? '✓ Completo' : doneCount+'/'+ramosS.length}</div>
+      <div class="mob-sem-toggle">▼</div>
+    `;
+    hdr.addEventListener('click', () => {
+      semEl.classList.toggle('collapsed');
+      semEl.querySelector('.mob-sem-body').style.maxHeight =
+        semEl.classList.contains('collapsed') ? '0' : (ramosS.length * 70 + 20) + 'px';
+    });
+    semEl.appendChild(hdr);
+
+    // Body
+    const body = document.createElement('div');
+    body.className = 'mob-sem-body';
+    body.style.maxHeight = (ramosS.length * 70 + 20) + 'px';
+
+    ramosS.forEach(r => {
+      const [nombre, sigla, cat, prereqs] = r;
+      const ramo    = { nombre, sigla, cat, prereqs: prereqs||[], sem:s };
+      const catData = DATA.categorias[cat] || { color:'#9e9a93', nombre:cat };
+      const isDone  = approved.has(sigla);
+      const unlock  = isUnlocked(ramo);
+
+      const row = document.createElement('div');
+      row.className = 'mob-ramo';
+      if (isDone)       row.classList.add('mob-done');
+      else if (!unlock) row.classList.add('mob-locked');
+
+      // prereq highlights
+      if (prereqMode && selectedId) {
+        const sel = getRamo(selectedId);
+        if (sel?.prereqs.includes(sigla)) row.style.background = 'rgba(61,122,94,.08)';
+        if (getDeps(selectedId).includes(sigla)) row.style.background = 'rgba(200,169,110,.08)';
+      }
+
+      row.innerHTML = `
+        <div class="mob-strip" style="background:${catData.color}"></div>
+        <div class="mob-ramo-info">
+          <div class="mob-ramo-sigla">${sigla}</div>
+          <div class="mob-ramo-name">${nombre}</div>
+          <div class="mob-ramo-cat" style="color:${catData.color}99">${catData.nombre}</div>
+        </div>
+        <div class="mob-ramo-right">
+          <div class="mob-check">${isDone ? '✓' : ''}</div>
+          ${!isDone && !unlock ? '<div class="mob-lock-icon">🔒</div>' : ''}
+        </div>
+      `;
+
+      row.addEventListener('click', () => {
+        if (prereqMode) {
+          selectedId = selectedId === sigla ? null : sigla;
+          render();
+          if (selectedId) openPanel(sigla);
+          else closePanel();
+          return;
+        }
+        if (!unlock && !isDone) return;
+        if (isDone) approved.delete(sigla); else approved.add(sigla);
+        save(); render();
+      });
+
+      body.appendChild(row);
+    });
+
+    semEl.appendChild(body);
+    container.appendChild(semEl);
+  }
+
+  // Mobile stats
+  const ramos = allRamos();
+  const total = ramos.length;
+  const done  = approved.size;
+  const avail = ramos.filter(r => !approved.has(r.sigla) && isUnlocked(r)).length;
+  const pct   = total ? Math.round(done/total*100) : 0;
+  document.getElementById('mob-fill').style.width  = pct + '%';
+  document.getElementById('mob-done').textContent  = done;
+  document.getElementById('mob-avail').textContent = avail;
+  document.getElementById('mob-pct').textContent   = pct + '%';
+
+  // Sync mobile prereq button
+  const mbtn = document.getElementById('mob-btn-prereq');
+  if (mbtn) mbtn.classList.toggle('on', prereqMode);
+}
+
+
+function render() {
+  const container = document.getElementById('malla');
+  container.innerHTML = '';
+
+  // Sem headers
+  const hdrs = document.createElement('div'); hdrs.className = 'sem-headers';
+  const sp = document.createElement('div'); sp.style.minWidth = '22px'; hdrs.appendChild(sp);
+  for (let s = 1; s <= DATA.semestres; s++) {
+    const cell = document.createElement('div'); cell.className = 'sem-hdr';
+    cell.style.borderColor = SEM_COLORS[s]+'60';
+    cell.innerHTML = `<div><span class="ciclo-chip ciclo-${s<=8?1:2}">Ciclo ${s<=8?1:2}</span></div>
+      <div class="sem-hdr-num" style="color:${SEM_COLORS[s]}">${s}°</div>
+      <div class="sem-hdr-sub">Semestre</div>`;
+    hdrs.appendChild(cell);
+  }
+  container.appendChild(hdrs);
+
+  // Areas
+  const AREAS = [
+    { key:'disciplinar', label:'Disciplinar', color:'#1a3a5c' },
+    { key:'basica',      label:'Básica',      color:'#7b8fa0' },
+    { key:'electiva',    label:'Electiva',    color:'#7c5cbf' },
+  ];
+
+  AREAS.forEach(area => {
+    const hasAny = Object.values(DATA.ramos).some(list => list.some(r => getArea(r[2]) === area.key));
+    if (!hasAny) return;
+
+    const areaRow = document.createElement('div'); areaRow.className = 'area-row';
+
+    const aLbl = document.createElement('div'); aLbl.className = 'area-label';
+    aLbl.style.borderColor = area.color+'40';
+    aLbl.style.color = area.color+'90';
+    aLbl.textContent = area.label;
+    areaRow.appendChild(aLbl);
+
+    const cols = document.createElement('div'); cols.className = 'area-cols';
+
+    for (let s = 1; s <= DATA.semestres; s++) {
+      const col = document.createElement('div'); col.className = 'sem-col';
+      const ramosS = (DATA.ramos['s'+s]||[]).filter(r => getArea(r[2]) === area.key);
+
+      ramosS.forEach((r, i) => {
+        const [nombre, sigla, cat, prereqs] = r;
+        const ramo    = { nombre, sigla, cat, prereqs: prereqs||[], sem:s };
+        const catData = DATA.categorias[cat] || { color:'#9e9a93', nombre:cat };
+        const isDone  = approved.has(sigla);
+        const unlock  = isUnlocked(ramo);
+        const missing = (prereqs||[]).filter(p => !approved.has(p));
+
+        const card = document.createElement('div');
+        card.className = 'ramo';
+        card.dataset.sigla = sigla;
+        card.style.animationDelay = (s * 0.03 + i * 0.02) + 's';
+
+        if (isDone)        card.classList.add('aprobado');
+        else if (!unlock)  card.classList.add('locked');
+
+        if (prereqMode && selectedId) {
+          const sel = getRamo(selectedId);
+          if (sigla === selectedId)              card.classList.add('sel');
+          if (sel?.prereqs.includes(sigla))      card.classList.add('prereq');
+          if (getDeps(selectedId).includes(sigla)) card.classList.add('unlocks');
+        }
+
+        // Build innerHTML cleanly — no appendChild+innerHTML mix
+        card.innerHTML = `
+          <div class="ramo-strip" style="background:${catData.color}"></div>
+          <div class="ramo-check">✓</div>
+          <div>
+            <div class="ramo-sigla">${sigla}</div>
+            <div class="ramo-nombre">${nombre}</div>
+          </div>
+          <div class="ramo-foot">
+            <span class="ramo-cat" style="color:${catData.color}99">${catData.nombre}</span>
+            ${cat==='ELE' ? '<span class="tag tag-ele">Electivo</span>' : ''}
+            ${cat==='CER' ? '<span class="tag tag-cer">Certif.</span>' : ''}
+            ${!isDone && !unlock ? `<span class="lock-badge">🔒 ${missing.length}</span>` : ''}
+          </div>`;
+
+        // Click handler
+        card.addEventListener('click', () => {
+          if (prereqMode) {
+            selectedId = selectedId === sigla ? null : sigla;
+            render();
+            selectedId ? openPanel(sigla) : closePanel();
+            return;
+          }
+          if (!unlock && !isDone) return;
+          if (isDone) approved.delete(sigla); else approved.add(sigla);
+          save(); render();
+        });
+
+        // Tooltip (sin atributo title — tooltip custom)
+        card.addEventListener('mousemove', e => {
+          const tip = document.getElementById('tooltip');
+          const prereqNames = (prereqs||[]).map(p => getRamo(p)?.nombre || p);
+          let html = `<strong>${nombre}</strong><small>Sem. ${s} · ${catData.nombre}</small>`;
+          if (prereqNames.length) html += `<div style="margin-top:5px;font-size:.62rem;opacity:.7">Prereqs: ${prereqNames.join(', ')}</div>`;
+          if (!unlock && !isDone) html += `<div style="color:#f87171;font-size:.6rem;margin-top:3px">🔒 Faltan ${missing.length} prerrequisito(s)</div>`;
+          tip.innerHTML = html;
+          tip.classList.add('vis');
+          tip.style.left = (e.clientX + 14) + 'px';
+          tip.style.top  = (e.clientY - 52) + 'px';
+        });
+        card.addEventListener('mouseleave', () => document.getElementById('tooltip').classList.remove('vis'));
+
+        col.appendChild(card);
+      });
+      cols.appendChild(col);
+    }
+    areaRow.appendChild(cols);
+    container.appendChild(areaRow);
+  });
+
+  updateStats();
+  renderMobile();
+}
+
+// ── PANEL ─────────────────────────────────────────────────────────────────────
+function openPanel(sigla) {
+  const ramo = getRamo(sigla);
+  if (!ramo) return;
+  const cat  = DATA.categorias[ramo.cat] || { color:'#9e9a93', nombre:ramo.cat };
+  const done = approved.has(sigla);
+  const unlock = isUnlocked(ramo);
+  const deps = getDeps(sigla);
+
+  document.getElementById('p-sigla').textContent = sigla;
+  document.getElementById('p-nombre').textContent = ramo.nombre;
+
+  const badge = document.getElementById('p-badge');
+  badge.textContent = cat.nombre;
+  badge.style.cssText = `border-color:${cat.color}50;color:${cat.color};background:${cat.color}12;display:inline-flex;align-items:center;gap:5px;font-family:'Geist Mono',monospace;font-size:.56rem;letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;border-radius:20px;margin-top:7px;border:1px solid;`;
+
+  const preDiv = document.getElementById('p-prereqs');
+  preDiv.innerHTML = ramo.prereqs.length
+    ? ramo.prereqs.map(p => {
+        const pr = getRamo(p);
+        const pc = DATA.categorias[pr?.cat] || { color:'#9e9a93' };
+        const ok = approved.has(p);
+        return `<div class="panel-pill" style="opacity:${ok?.9:.5}">
+          <div class="p-dot" style="background:${pc.color}"></div>
+          <span>${pr?.nombre || p}</span>
+          ${ok ? '<span class="p-done">✓</span>' : ''}
+        </div>`;
+      }).join('')
+    : '<div style="color:var(--g4);font-size:.7rem;padding:6px 0">Sin prerrequisitos</div>';
+
+  const depDiv = document.getElementById('p-desbloquea');
+  depDiv.innerHTML = deps.length
+    ? deps.map(d => {
+        const dr = getRamo(d);
+        const dc = DATA.categorias[dr?.cat] || { color:'#9e9a93' };
+        return `<div class="panel-pill"><div class="p-dot" style="background:${dc.color}"></div><span>${dr?.nombre || d}</span></div>`;
+      }).join('')
+    : '<div style="color:var(--g4);font-size:.7rem;padding:6px 0">Ningún ramo directo</div>';
+
+  const btn = document.getElementById('p-btn');
+  btn.style = '';
+  if (done) { btn.textContent='✕ Marcar como pendiente'; btn.className='panel-btn panel-btn-un'; }
+  else if (unlock) { btn.textContent='✓ Marcar como aprobado'; btn.className='panel-btn panel-btn-ok'; }
+  else { btn.textContent='🔒 Faltan prerrequisitos'; btn.className='panel-btn panel-btn-lock'; }
+
+  document.getElementById('panel').classList.add('open');
+}
+
+function closePanel() {
+  document.getElementById('panel').classList.remove('open');
+  if (prereqMode && selectedId) { selectedId = null; render(); }
+}
+
+function toggleFromPanel() {
+  if (!selectedId) return;
+  const ramo = getRamo(selectedId);
+  if (!ramo) return;
+  const done = approved.has(selectedId);
+  if (!done && !isUnlocked(ramo)) return;
+  if (done) approved.delete(selectedId); else approved.add(selectedId);
+  save(); render(); openPanel(selectedId);
+}
+
+// ── CONTROLS ──────────────────────────────────────────────────────────────────
+function togglePrereqMode() {
+  prereqMode = !prereqMode;
+  document.getElementById('btn-prereq').classList.toggle('on', prereqMode);
+  if (!prereqMode) { selectedId = null; closePanel(); }
+  render();
+}
+function resetAll() {
+  if (!confirm('¿Reiniciar toda la malla?')) return;
+  approved.clear(); save(); selectedId = null; closePanel(); render();
+}
+function aprobarSemestre() {
+  for (let s = 1; s <= DATA.semestres; s++) {
+    const rs = (DATA.ramos['s'+s]||[]).map(r => ({ sigla:r[1], prereqs:r[3]||[] }));
+    if (rs.some(r => !approved.has(r.sigla))) {
+      rs.forEach(r => { if (isUnlocked(r)) approved.add(r.sigla); });
+      save(); render(); return;
+    }
+  }
+}
+
+// ── AUTH ──────────────────────────────────────────────────────────────────────
+function dismissBanner() {
+  document.getElementById('auth-banner').style.display = 'none';
+  localStorage.setItem('malla_banner', '1');
+}
+function openModal() { document.getElementById('modal-overlay').classList.add('open'); }
+function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
+function overlayClick(e) { if (e.target === document.getElementById('modal-overlay')) closeModal(); }
+function switchTab(tab) {
+  document.getElementById('tab-login').classList.toggle('active', tab==='login');
+  document.getElementById('tab-reg').classList.toggle('active', tab==='reg');
+  const btn = document.getElementById('m-submit');
+  btn.textContent = tab==='login' ? 'Iniciar sesión' : 'Crear cuenta';
+  btn.dataset.mode = tab;
+  document.getElementById('m-err').style.display = 'none';
+}
+async function handleAuth() {
+  const email = document.getElementById('m-email').value.trim();
+  const pass  = document.getElementById('m-pass').value;
+  const mode  = document.getElementById('m-submit').dataset.mode || 'login';
+  const err   = document.getElementById('m-err');
+  err.style.display = 'none';
+  if (!email || !pass) { err.textContent='Completa todos los campos.'; err.style.display='block'; return; }
+  if (!supabase) { err.textContent='Supabase no configurado aún.'; err.style.display='block'; return; }
+  try {
+    const res = mode==='reg'
+      ? await supabase.auth.signUp({ email, password:pass })
+      : await supabase.auth.signInWithPassword({ email, password:pass });
+    if (res.error) { err.textContent=res.error.message; err.style.display='block'; return; }
+    closeModal(); dismissBanner();
+    updateAuthUI(email);
+    if (res.data.user?.id) await loadCloud(res.data.user.id);
+  } catch(e) { err.textContent='Error de conexión.'; err.style.display='block'; }
+}
+function updateAuthUI(email) {
+  const btn = document.getElementById('auth-btn');
+  btn.innerHTML = `<div class="auth-dot"></div>${email.split('@')[0]}`;
+  btn.classList.add('logged');
+}
+function handleAuthBtn() {
+  if (!document.getElementById('auth-btn').classList.contains('logged')) openModal();
+}
+
+// ── THEME ─────────────────────────────────────────────────────────────────────
+function toggleTheme() {
+  const dark = document.documentElement.classList.toggle('dark');
+  localStorage.setItem('malla_theme', dark ? 'dark' : 'light');
+}
+(function initTheme() {
+  const saved = localStorage.getItem('malla_theme');
+  const sys   = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if (saved === 'dark' || (!saved && sys)) document.documentElement.classList.add('dark');
+})();
+
+// ── CLICK OUTSIDE ─────────────────────────────────────────────────────────────
+document.addEventListener('click', e => {
+  if (!e.target.closest('.ramo') && !e.target.closest('.panel') && !e.target.closest('.ctrl')) {
+    if (prereqMode && selectedId) { selectedId = null; render(); }
+    if (!e.target.closest('.panel')) closePanel();
+  }
+});
+
+// ── BANNER CHECK ──────────────────────────────────────────────────────────────
+if (localStorage.getItem('malla_banner') === '1') {
+  document.getElementById('auth-banner').style.display = 'none';
+}
+
+// ── FALLBACK DATA ─────────────────────────────────────────────────────────────
+const FALLBACK = {"carrera":"Administración Pública","titulo":"Administrador(a) Público(a)","licenciatura":"Licenciado(a) en Gestión Pública","semestres":10,"categorias":{"GES":{"color":"#1a3a5c","nombre":"Gestión"},"POL":{"color":"#1f6b4a","nombre":"Políticas Públicas"},"INN":{"color":"#8b4e1a","nombre":"Innovación"},"CPO":{"color":"#7a6000","nombre":"Ciencia Política"},"MET":{"color":"#6b3a0a","nombre":"Metodología"},"ECO":{"color":"#234d7a","nombre":"Economía"},"DER":{"color":"#3a4a5c","nombre":"Derecho"},"TRV":{"color":"#8a1a3a","nombre":"Transversal"},"BAS":{"color":"#4a5568","nombre":"Formación Básica"},"ELE":{"color":"#5a2d8a","nombre":"Electivo"},"CER":{"color":"#8b6914","nombre":"Certificación"}},"ramos":{"s1":[["Administración pública","AP-101","GES",[],""],[" Historia del pensamiento político","AP-102","CPO",[],""],[" Ética pública","AP-103","TRV",[],""],[" Introducción a la economía","AP-104","ECO",[],""],[" Fundamentos de matemáticas I","AP-105","BAS",[],""],[" Métodos de investigación en cs. sociales","AP-106","MET",[],""]],"s2":[["Gestión pública","AP-201","GES",[],""],[" Ciencia política I","AP-202","CPO",[],""],[" Enfoque y perspectiva de género","AP-203","TRV",[],""],[" Macroeconomía","AP-204","ECO",[],""],[" Fundamentos de matemáticas II","AP-205","BAS",[],""],[" Fundamentos del derecho","AP-206","DER",[],""]],"s3":[["Gobierno y desarrollo regional","AP-301","GES",[],""],[" Ciencia política II","AP-302","CPO",[],""],[" Instituciones y procesos políticos chilenos","AP-303","CPO",[],""],[" Derecho constitucional","AP-304","DER",[],""],[" Contabilidad I","AP-305","BAS",[],""],[" Electivo 1","AP-EL1","ELE",[],""]],"s4":[["Economía del sector público","AP-401","ECO",[],""],[" Teoría del estado y del gobierno","AP-402","CPO",[],""],[" Finanzas públicas","AP-403","ECO",[],""],[" Gestión de personas","AP-404","GES",[],""],[" Métodos y técnicas de inv. cualitativa","AP-405","MET",[],""],[" Electivo 2","AP-EL2","ELE",[],""]],"s5":[["Derecho administrativo","AP-501","DER",[],""],[" Sistema político","AP-502","CPO",[],""],[" Contabilidad gubernamental","AP-503","GES",[],""],[" Estadística I","AP-504","MET",[],""],[" Métodos y técnicas de inv. cuantitativa","AP-505","MET",[],""],[" Certificación 1","AP-CE1","CER",[],""]],"s6":[["Procedimientos administrativos","AP-601","DER",[],""],[" Relaciones internacionales","AP-602","CPO",[],""],[" Planificación y control de gestión pública","AP-603","GES",[],""],[" Estadística II","AP-604","MET",[],""],[" Electivo 3","AP-EL3","ELE",[],""],[" Certificación 2","AP-CE2","CER",[],""]],"s7":[["Administración municipal","AP-701","GES",[],""],[" Negociación y toma de decisiones","AP-702","GES",[],""],[" Políticas públicas","AP-703","POL",[],""],[" Análisis de datos para la adm. pública I","AP-704","MET",[],""],[" Laboratorio de innovación","AP-705","INN",[],""]],"s8":[["Dirección pública","AP-801","GES",[],""],[" Modernización del estado","AP-802","GES",[],""],[" Evaluación de políticas públicas","AP-803","POL",[],""],[" Análisis de datos para la adm. pública II","AP-804","MET",[],""],[" Políticas sociales","AP-805","POL",[],""],[" Electivo 4","AP-EL4","ELE",[],""],[" Certificación 3","AP-CE3","CER",[],""]],"s9":[["Compras públicas","AP-901","GES",[],""],[" Sistemas de información y procesos del estado","AP-902","GES",[],""],[" Seminario de titulación I","AP-903","POL",[],""]],"s10":[["Práctica profesional","AP-1001","GES",[],""],[" Seminario de titulación II","AP-1002","POL",[],""]]
+}};
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+loadData();
+</script>
+</body>
+</html>
