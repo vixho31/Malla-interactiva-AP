@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Carta Gantt — Centro de Alumnos 2026–2027</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #1a2744;
+    --navy-light: #243460;
+    --gold: #e8a020;
+    --gold-light: #f5c84a;
+    --cream: #f7f3ec;
+    --white: #ffffff;
+    --gray: #8a9ab5;
+    --gray-light: #e8edf5;
+
+    --eje1: #e05c5c; /* Bienestar */
+    --eje2: #4a90d9; /* Académico */
+    --eje3: #50b88a; /* Profesional */
+    --eje4: #9b72cf; /* Participación */
+
+    --eje1-bg: rgba(224,92,92,0.12);
+    --eje2-bg: rgba(74,144,217,0.12);
+    --eje3-bg: rgba(80,184,138,0.12);
+    --eje4-bg: rgba(155,114,207,0.12);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--navy);
+    color: var(--cream);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
+    border-bottom: 2px solid var(--gold);
+    padding: 28px 40px 24px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+  }
+
+  .header-left h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2rem;
+    color: var(--white);
+    line-height: 1.1;
+  }
+
+  .header-left h1 span {
+    color: var(--gold);
+  }
+
+  .header-left p {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--gray);
+    margin-top: 6px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .legend {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.72rem;
+    font-family: 'DM Mono', monospace;
+    color: var(--gray);
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 20px;
+    border: 1px solid transparent;
+    transition: all 0.2s;
+  }
+
+  .legend-item:hover {
+    background: rgba(255,255,255,0.05);
+    color: var(--cream);
+  }
+
+  .legend-item.active {
+    border-color: currentColor;
+    color: var(--cream);
+  }
+
+  .legend-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* MAIN */
+  main {
+    padding: 0 0 60px;
+  }
+
+  /* GANTT CONTAINER */
+  .gantt-wrapper {
+    overflow-x: auto;
+    padding: 0 40px 20px;
+  }
+
+  .gantt-table {
+    min-width: 1100px;
+    width: 100%;
+  }
+
+  /* MONTHS HEADER */
+  .months-row {
+    display: grid;
+    grid-template-columns: 280px repeat(12, 1fr);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    margin-top: 30px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--navy);
+  }
+
+  .month-label-spacer {
+    padding: 12px 0;
+  }
+
+  .month-label {
+    text-align: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 12px 4px;
+    color: var(--gray);
+    border-left: 1px solid rgba(255,255,255,0.05);
+    position: relative;
+  }
+
+  .month-label.current {
+    color: var(--gold);
+    font-weight: 700;
+  }
+
+  .month-label.current::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--gold);
+  }
+
+  /* EJE SECTION */
+  .eje-section {
+    margin-top: 0;
+  }
+
+  .eje-header {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    align-items: center;
+    padding: 14px 0 6px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    margin-top: 8px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .eje-title-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-right: 16px;
+  }
+
+  .eje-badge {
+    width: 8px; height: 28px;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+
+  .eje-name {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .eje-toggle {
+    font-size: 0.6rem;
+    color: var(--gray);
+    margin-left: 4px;
+    transition: transform 0.3s;
+  }
+
+  .eje-section.collapsed .eje-toggle {
+    transform: rotate(-90deg);
+  }
+
+  .eje-bar-area {
+    padding: 4px 0;
+  }
+
+  /* ACTIVITY ROW */
+  .activity-rows {
+    overflow: hidden;
+    transition: max-height 0.35s ease;
+  }
+
+  .eje-section.collapsed .activity-rows {
+    max-height: 0 !important;
+  }
+
+  .activity-row {
+    display: grid;
+    grid-template-columns: 280px repeat(12, 1fr);
+    align-items: center;
+    min-height: 40px;
+    border-radius: 4px;
+    transition: background 0.15s;
+    cursor: pointer;
+  }
+
+  .activity-row:hover {
+    background: rgba(255,255,255,0.03);
+  }
+
+  .activity-name {
+    font-size: 0.75rem;
+    color: var(--cream);
+    padding: 8px 16px 8px 22px;
+    line-height: 1.3;
+    opacity: 0.85;
+  }
+
+  .activity-name.completed {
+    text-decoration: line-through;
+    opacity: 0.4;
+  }
+
+  .gantt-cells {
+    display: contents;
+  }
+
+  .gantt-cell {
+    height: 40px;
+    border-left: 1px solid rgba(255,255,255,0.04);
+    position: relative;
+  }
+
+  .bar {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 14px;
+    border-radius: 7px;
+    transition: filter 0.2s, transform 0.2s;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+
+  .bar:hover {
+    filter: brightness(1.2);
+    transform: translateY(-50%) scaleY(1.2);
+  }
+
+  /* bars spanning entire cells */
+  .bar-full { left: 0; right: 0; border-radius: 0; }
+  .bar-start { left: 50%; right: 0; border-radius: 0; border-top-left-radius: 7px; border-bottom-left-radius: 7px; }
+  .bar-end { left: 0; right: 50%; border-radius: 0; border-top-right-radius: 7px; border-bottom-right-radius: 7px; }
+  .bar-single { left: 10%; right: 10%; border-radius: 7px; }
+
+  /* Prioridad chips */
+  .priority-chip {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 10px;
+    margin-left: 8px;
+    vertical-align: middle;
+    font-weight: 600;
+  }
+  .chip-inmediato { background: rgba(232,160,32,0.2); color: var(--gold-light); border: 1px solid rgba(232,160,32,0.4); }
+  .chip-mediano { background: rgba(74,144,217,0.2); color: #7bbde8; border: 1px solid rgba(74,144,217,0.4); }
+  .chip-estructural { background: rgba(155,114,207,0.2); color: #c4a8ef; border: 1px solid rgba(155,114,207,0.4); }
+
+  /* TOOLTIP */
+  .tooltip {
+    position: fixed;
+    background: var(--navy-light);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: var(--cream);
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 0.72rem;
+    font-family: 'DM Mono', monospace;
+    pointer-events: none;
+    z-index: 999;
+    opacity: 0;
+    transition: opacity 0.15s;
+    max-width: 220px;
+    line-height: 1.5;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+
+  .tooltip.visible { opacity: 1; }
+  .tooltip strong { color: var(--gold-light); display: block; margin-bottom: 4px; }
+
+  /* STATS BAR */
+  .stats-bar {
+    display: flex;
+    gap: 32px;
+    padding: 20px 40px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    flex-wrap: wrap;
+  }
+
+  .stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .stat-number {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.8rem;
+    color: var(--gold);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    color: var(--gray);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .stat-divider {
+    width: 1px;
+    background: rgba(255,255,255,0.08);
+    align-self: stretch;
+    margin: 0 8px;
+  }
+
+  /* PROGRESS */
+  .progress-section {
+    padding: 16px 40px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .progress-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--gray);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+  }
+
+  .progress-track {
+    flex: 1;
+    height: 4px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light));
+    border-radius: 2px;
+    transition: width 0.5s ease;
+  }
+
+  .progress-pct {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--gold);
+    font-weight: 500;
+    min-width: 36px;
+    text-align: right;
+  }
+
+  /* CONTROLS */
+  .controls {
+    display: flex;
+    gap: 10px;
+    padding: 20px 40px 0;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .ctrl-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--gray);
+    padding: 7px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .ctrl-btn:hover {
+    background: rgba(255,255,255,0.1);
+    color: var(--cream);
+    border-color: rgba(255,255,255,0.2);
+  }
+
+  .ctrl-spacer { flex: 1; }
+
+  .completed-count {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--gray);
+  }
+
+  .completed-count span {
+    color: var(--gold-light);
+    font-weight: 600;
+  }
+
+  /* CURRENT MONTH LINE */
+  .current-month-line {
+    position: absolute;
+    top: 0; bottom: 0;
+    left: 50%;
+    width: 2px;
+    background: var(--gold);
+    opacity: 0.5;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  @media (max-width: 768px) {
+    header { padding: 20px; flex-direction: column; align-items: flex-start; }
+    .gantt-wrapper { padding: 0 16px 20px; }
+    .stats-bar { padding: 16px; gap: 16px; }
+    .controls { padding: 16px; }
+    .progress-section { padding: 12px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <h1>Carta Gantt — <span>Centro de Alumnos</span></h1>
+    <p>Escuela de Gobierno · Adm. Pública · Mayo 2026 – Abril 2027</p>
+  </div>
+  <div class="legend">
+    <div class="legend-item active" data-eje="1" style="color: var(--eje1)">
+      <div class="legend-dot" style="background:var(--eje1)"></div>Bienestar
+    </div>
+    <div class="legend-item active" data-eje="2" style="color: var(--eje2)">
+      <div class="legend-dot" style="background:var(--eje2)"></div>Académico
+    </div>
+    <div class="legend-item active" data-eje="3" style="color: var(--eje3)">
+      <div class="legend-dot" style="background:var(--eje3)"></div>Profesional
+    </div>
+    <div class="legend-item active" data-eje="4" style="color: var(--eje4)">
+      <div class="legend-dot" style="background:var(--eje4)"></div>Participación
+    </div>
+  </div>
+</header>
+
+<div class="stats-bar">
+  <div class="stat">
+    <div class="stat-number">4</div>
+    <div class="stat-label">Ejes estratégicos</div>
+  </div>
+  <div class="stat-divider"></div>
+  <div class="stat">
+    <div class="stat-number" id="total-count">20</div>
+    <div class="stat-label">Actividades totales</div>
+  </div>
+  <div class="stat-divider"></div>
+  <div class="stat">
+    <div class="stat-number" id="done-count">0</div>
+    <div class="stat-label">Completadas</div>
+  </div>
+  <div class="stat-divider"></div>
+  <div class="stat">
+    <div class="stat-number">12</div>
+    <div class="stat-label">Meses de ejecución</div>
+  </div>
+</div>
+
+<div class="progress-section">
+  <span class="progress-label">Avance global</span>
+  <div class="progress-track">
+    <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+  </div>
+  <span class="progress-pct" id="progress-pct">0%</span>
+</div>
+
+<div class="controls">
+  <button class="ctrl-btn" onclick="expandAll()">↓ Expandir todo</button>
+  <button class="ctrl-btn" onclick="collapseAll()">↑ Colapsar todo</button>
+  <button class="ctrl-btn" onclick="resetCompleted()">↺ Reiniciar avance</button>
+  <div class="ctrl-spacer"></div>
+  <div class="completed-count">Haz clic en una actividad para marcarla como <span>completada</span></div>
+</div>
+
+<main>
+  <div class="gantt-wrapper">
+    <div class="gantt-table" id="gantt-table"></div>
+  </div>
+</main>
+
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+const MONTHS = ['May','Jun','Jul','Ago','Sep','Oct','Nov','Dic','Ene','Feb','Mar','Abr'];
+const MONTHS_FULL = ['Mayo 2026','Junio 2026','Julio 2026','Agosto 2026','Septiembre 2026','Octubre 2026','Noviembre 2026','Diciembre 2026','Enero 2027','Febrero 2027','Marzo 2027','Abril 2027'];
+
+// start=0 is May 2026, end=11 is April 2027 (inclusive)
+const EJES = [
+  {
+    id: 1,
+    name: 'Bienestar e Impacto Social',
+    color: 'var(--eje1)',
+    bg: 'var(--eje1-bg)',
+    actividades: [
+      { name: 'Diagnóstico de necesidades estudiantiles', start: 0, end: 1, priority: 'inmediato', desc: 'Levantamiento de necesidades: espacios, colación, salud mental, inclusión.' },
+      { name: 'Red de bienestar + difusión de apoyos', start: 1, end: 5, priority: 'inmediato', desc: 'Orientación, difusión de apoyos UAI y acompañamiento entre generaciones.' },
+      { name: 'Convenios (alimentación, impresiones, librerías)', start: 1, end: 3, priority: 'inmediato', desc: 'Convenios con comercios cercanos para beneficios de uso diario.' },
+      { name: 'Jornadas de autocuidado y manejo del estrés', start: 3, end: 4, priority: 'mediano', desc: 'Talleres de autocuidado, vida universitaria y bienestar mental.' },
+      { name: 'Semana de Bienestar', start: 7, end: 7, priority: 'mediano', desc: 'Evento central del segundo semestre. Campaña solidaria + actividades.' },
+      { name: 'Voluntariado territorial', start: 5, end: 9, priority: 'mediano', desc: 'Actividades comunitarias con sello público y territorial.' },
+    ]
+  },
+  {
+    id: 2,
+    name: 'Proyectos Académicos',
+    color: 'var(--eje2)',
+    bg: 'var(--eje2-bg)',
+    actividades: [
+      { name: 'Central de apuntes (por ramo y generación)', start: 0, end: 1, priority: 'inmediato', desc: 'Plataforma compartida de apuntes, organizada por ramo, generación y docente.' },
+      { name: 'Banco de pruebas y guías anteriores', start: 0, end: 2, priority: 'inmediato', desc: 'Repositorio de controles y guías anteriores como apoyo formativo.' },
+      { name: 'Tutorías entre pares (semanas de pruebas)', start: 2, end: 2, priority: 'mediano', desc: 'Grupos de estudio en semanas clave del semestre.' },
+      { name: 'Talleres breves: APA, redacción, método', start: 1, end: 3, priority: 'mediano', desc: 'Talleres breves de redacción, APA, exposiciones y organización semestral.' },
+      { name: 'Canal de observaciones académicas', start: 0, end: 11, priority: 'estructural', desc: 'Canal permanente para informar sobre horarios, carga y evaluaciones.' },
+      { name: 'Guías prácticas primer año', start: 0, end: 1, priority: 'inmediato', desc: 'Guías para primer año: informes, ensayos, trámites y beneficios.' },
+    ]
+  },
+  {
+    id: 3,
+    name: 'Desarrollo Profesional',
+    color: 'var(--eje3)',
+    bg: 'var(--eje3-bg)',
+    actividades: [
+      { name: 'Ciclo de charlas con egresados y sector público', start: 2, end: 9, priority: 'mediano', desc: 'Charlas con egresados, funcionarios y especialistas del sector público.' },
+      { name: 'Talleres: CV, entrevistas, LinkedIn, oratoria', start: 1, end: 3, priority: 'mediano', desc: 'Formación en habilidades para el mercado laboral público.' },
+      { name: 'Feria de prácticas y voluntariados', start: 2, end: 2, priority: 'mediano', desc: 'Feria de oportunidades de prácticas, voluntariados y formación complementaria.' },
+      { name: 'Salidas a terreno (municipios, ministerios…)', start: 4, end: 9, priority: 'mediano', desc: 'Visitas a Contraloría, ministerios, Congreso, La Moneda, municipios.' },
+      { name: 'Red de mentorías con egresados', start: 3, end: 11, priority: 'estructural', desc: 'Red de contactos y mentorías con egresados de la carrera.' },
+    ]
+  },
+  {
+    id: 4,
+    name: 'Participación y Representación',
+    color: 'var(--eje4)',
+    bg: 'var(--eje4-bg)',
+    actividades: [
+      { name: 'Formulario permanente de propuestas', start: 0, end: 11, priority: 'inmediato', desc: 'Canal permanente para inquietudes, propuestas y problemas por ramo.' },
+      { name: 'Mesa de trabajo con dirección de escuela', start: 1, end: 11, priority: 'estructural', desc: 'Reuniones periódicas con la dirección y seguimiento de acuerdos.' },
+      { name: 'Encuesta semestral del estado de la carrera', start: 4, end: 4, priority: 'mediano', desc: 'Encuesta sobre aspectos académicos, bienestar e infraestructura.' },
+      { name: 'Delegados por generación', start: 0, end: 11, priority: 'estructural', desc: 'Representantes por generación para canalizar información al CA.' },
+      { name: 'Observatorio estudiantil (reportes breves)', start: 3, end: 11, priority: 'estructural', desc: 'Reporte de prioridades, avances y evidencias visibles del CA.' },
+    ]
+  }
+];
+
+const completedSet = new Set(JSON.parse(localStorage.getItem('gantt_completed') || '[]'));
+
+function saveCompleted() {
+  try { localStorage.setItem('gantt_completed', JSON.stringify([...completedSet])); } catch(e) {}
+}
+
+function updateProgress() {
+  const total = EJES.reduce((s, e) => s + e.actividades.length, 0);
+  const done = completedSet.size;
+  const pct = Math.round((done / total) * 100);
+  document.getElementById('done-count').textContent = done;
+  document.getElementById('total-count').textContent = total;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-pct').textContent = pct + '%';
+}
+
+function renderGantt() {
+  const table = document.getElementById('gantt-table');
+  table.innerHTML = '';
+
+  // Months header
+  const monthsRow = document.createElement('div');
+  monthsRow.className = 'months-row';
+  const spacer = document.createElement('div');
+  spacer.className = 'month-label-spacer';
+  monthsRow.appendChild(spacer);
+
+  MONTHS.forEach((m, i) => {
+    const ml = document.createElement('div');
+    ml.className = 'month-label' + (i === 0 ? ' current' : '');
+    ml.textContent = m;
+    monthsRow.appendChild(ml);
+  });
+  table.appendChild(monthsRow);
+
+  EJES.forEach(eje => {
+    const section = document.createElement('div');
+    section.className = 'eje-section';
+    section.dataset.eje = eje.id;
+
+    // EJE HEADER
+    const ejeHeader = document.createElement('div');
+    ejeHeader.className = 'eje-header';
+    ejeHeader.innerHTML = `
+      <div class="eje-title-cell">
+        <div class="eje-badge" style="background:${eje.color}"></div>
+        <span class="eje-name" style="color:${eje.color}">${eje.name}</span>
+        <span class="eje-toggle">▼</span>
+      </div>
+      <div class="eje-bar-area"></div>
+    `;
+    ejeHeader.addEventListener('click', () => {
+      section.classList.toggle('collapsed');
+    });
+    section.appendChild(ejeHeader);
+
+    // ACTIVITY ROWS
+    const rowsContainer = document.createElement('div');
+    rowsContainer.className = 'activity-rows';
+
+    eje.actividades.forEach((act, idx) => {
+      const key = `${eje.id}-${idx}`;
+      const row = document.createElement('div');
+      row.className = 'activity-row';
+
+      const isDone = completedSet.has(key);
+
+      const chipClass = { inmediato: 'chip-inmediato', mediano: 'chip-mediano', estructural: 'chip-estructural' }[act.priority];
+      const chipLabel = { inmediato: 'Inmediato', mediano: 'Mediano plazo', estructural: 'Estructural' }[act.priority];
+
+      // Name cell
+      const nameCell = document.createElement('div');
+      nameCell.className = 'activity-name' + (isDone ? ' completed' : '');
+      nameCell.innerHTML = `${act.name} <span class="priority-chip ${chipClass}">${chipLabel}</span>`;
+      row.appendChild(nameCell);
+
+      // Bar cells
+      for (let m = 0; m < 12; m++) {
+        const cell = document.createElement('div');
+        cell.className = 'gantt-cell';
+        cell.style.position = 'relative';
+
+        if (m >= act.start && m <= act.end) {
+          const bar = document.createElement('div');
+          let posClass = 'bar-full';
+          if (act.start === act.end) posClass = 'bar-single';
+          else if (m === act.start) posClass = 'bar-start';
+          else if (m === act.end) posClass = 'bar-end';
+          bar.className = `bar ${posClass}`;
+          bar.style.background = isDone
+            ? `rgba(138,154,181,0.4)`
+            : `${eje.color}`;
+          bar.style.opacity = isDone ? '0.5' : '0.85';
+          cell.appendChild(bar);
+        }
+
+        row.appendChild(cell);
+      }
+
+      // Click to complete
+      row.addEventListener('click', () => {
+        if (completedSet.has(key)) {
+          completedSet.delete(key);
+        } else {
+          completedSet.add(key);
+        }
+        saveCompleted();
+        renderGantt();
+        updateProgress();
+      });
+
+      // Tooltip
+      row.addEventListener('mousemove', (e) => {
+        const tip = document.getElementById('tooltip');
+        tip.innerHTML = `<strong>${act.name}</strong>${MONTHS_FULL[act.start]} → ${MONTHS_FULL[act.end]}<br><span style="color:var(--gray);margin-top:4px;display:block">${act.desc}</span>`;
+        tip.classList.add('visible');
+        tip.style.left = (e.clientX + 14) + 'px';
+        tip.style.top = (e.clientY - 40) + 'px';
+      });
+      row.addEventListener('mouseleave', () => {
+        document.getElementById('tooltip').classList.remove('visible');
+      });
+
+      rowsContainer.appendChild(row);
+    });
+
+    // Set max-height for animation
+    rowsContainer.style.maxHeight = (eje.actividades.length * 50) + 'px';
+    section.appendChild(rowsContainer);
+    table.appendChild(section);
+  });
+
+  updateProgress();
+}
+
+function expandAll() {
+  document.querySelectorAll('.eje-section').forEach(s => s.classList.remove('collapsed'));
+}
+function collapseAll() {
+  document.querySelectorAll('.eje-section').forEach(s => s.classList.add('collapsed'));
+}
+function resetCompleted() {
+  if (!confirm('¿Reiniciar todas las actividades completadas?')) return;
+  completedSet.clear();
+  saveCompleted();
+  renderGantt();
+  updateProgress();
+}
+
+renderGantt();
+</script>
+</body>
+</html>
