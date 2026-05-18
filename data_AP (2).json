@@ -1,0 +1,96 @@
+{
+  "carrera": "Administración Pública",
+  "titulo": "Administrador(a) Público(a)",
+  "licenciatura": "Licenciado(a) en Gestión Pública",
+  "semestres": 10,
+
+  "categorias": {
+    "GES": { "color": "#1a3a5c", "nombre": "Gestión" },
+    "POL": { "color": "#1f6b4a", "nombre": "Políticas Públicas" },
+    "INN": { "color": "#8b4e1a", "nombre": "Innovación" },
+    "CPO": { "color": "#7a6000", "nombre": "Ciencia Política" },
+    "MET": { "color": "#6b3a0a", "nombre": "Metodología" },
+    "ECO": { "color": "#234d7a", "nombre": "Economía" },
+    "DER": { "color": "#3a4a5c", "nombre": "Derecho" },
+    "TRV": { "color": "#8a1a3a", "nombre": "Transversal" },
+    "BAS": { "color": "#4a5568", "nombre": "Formación Básica" },
+    "ELE": { "color": "#5a2d8a", "nombre": "Electivo" },
+    "CER": { "color": "#8b6914", "nombre": "Certificación" }
+  },
+
+  "ramos": {
+    "s1": [
+      ["Administración pública",                        "AP-101", "GES", [],                          ""],
+      ["Historia del pensamiento político",             "AP-102", "CPO", [],                          ""],
+      ["Ética pública",                                 "AP-103", "TRV", [],                          ""],
+      ["Introducción a la economía",                    "AP-104", "ECO", [],                          ""],
+      ["Fundamentos de matemáticas I",                  "AP-105", "BAS", [],                          ""],
+      ["Métodos de investigación en ciencias sociales", "AP-106", "MET", [],                          ""]
+    ],
+    "s2": [
+      ["Gestión pública",                               "AP-201", "GES", ["AP-101"],                  ""],
+      ["Ciencia política I",                            "AP-202", "CPO", [],                          ""],
+      ["Enfoque y perspectiva de género",               "AP-203", "TRV", [],                          ""],
+      ["Macroeconomía",                                 "AP-204", "ECO", ["AP-104"],                  ""],
+      ["Fundamentos de matemáticas II",                 "AP-205", "BAS", ["AP-105"],                  ""],
+      ["Fundamentos del derecho",                       "AP-206", "DER", [],                          ""]
+    ],
+    "s3": [
+      ["Gobierno y desarrollo regional",                "AP-301", "GES", [],                          ""],
+      ["Ciencia política II",                           "AP-302", "CPO", ["AP-202"],                  ""],
+      ["Instituciones y procesos políticos chilenos",   "AP-303", "CPO", [],                          ""],
+      ["Derecho constitucional",                        "AP-304", "DER", ["AP-206"],                  ""],
+      ["Contabilidad I",                                "AP-305", "BAS", [],                          ""],
+      ["Electivo 1",                                    "AP-EL1", "ELE", [],                  ""]
+    ],
+    "s4": [
+      ["Teoría del estado y del gobierno",              "AP-402", "CPO", [],                          ""],
+      ["Gestión de personas",                           "AP-404", "GES", [],                          ""],
+      ["Métodos y técnicas de investigación cualitativa","AP-405","MET", ["AP-106"],                  ""],
+      ["Economía del sector público",                   "AP-401", "ECO", ["AP-204"],                  ""],
+      ["Finanzas públicas",                             "AP-403", "ECO", ["AP-305"],                  ""],
+      ["Electivo 2",                                    "AP-EL2", "ELE", [],                          ""]
+    ],
+    "s5": [
+      ["Sistema político",                              "AP-502", "CPO", [],                          ""],
+      ["Derecho administrativo",                        "AP-501", "DER", ["AP-304"],                  ""],
+      ["Métodos y técnicas de investigación cuantitativa","AP-505","MET",["AP-405"],                  ""],
+      ["Estadística I",                                 "AP-504", "MET", ["AP-401"],                  ""],
+      ["Contabilidad gubernamental",                    "AP-503", "GES", ["AP-403"],                  ""],
+      ["Certificación 1",                               "AP-CE1", "CER", [],                          ""]
+    ],
+    "s6": [
+      ["Relaciones internacionales",                    "AP-602", "CPO", [],                          ""],
+      ["Procedimientos administrativos",                "AP-601", "DER", ["AP-501"],                  ""],
+      ["Planificación y control de gestión pública",    "AP-603", "GES", ["AP-505"],                  ""],
+      ["Estadística II",                                "AP-604", "MET", ["AP-504"],                  ""],
+      ["Electivo 3",                                    "AP-EL3", "ELE", [],                          ""],
+      ["Certificación 2",                               "AP-CE2", "CER", [],                          ""]
+    ],
+    "s7": [
+      ["Administración municipal",                      "AP-701", "GES", ["AP-301"],                  ""],
+      ["Negociación y toma de decisiones",              "AP-702", "GES", [],                          ""],
+      ["Políticas públicas",                            "AP-703", "POL", [],                          ""],
+      ["Análisis de datos para la adm. pública I",     "AP-704", "MET", ["AP-603"],                  ""],
+      ["Diseño de servicios y experiencias",            "AP-705", "INN", [],                          ""]
+    ],
+    "s8": [
+      ["Dirección pública",                             "AP-801", "GES", [],                          ""],
+      ["Modernización del estado",                      "AP-802", "GES", [],                          ""],
+      ["Políticas sociales",                            "AP-805", "POL", ["AP-703"],                  ""],
+      ["Análisis de datos para la adm. pública II",    "AP-804", "MET", ["AP-704"],                  ""],
+      ["Evaluación de políticas públicas",              "AP-803", "POL", ["AP-703","AP-EL4"],         ""],
+      ["Electivo 4",                                    "AP-EL4", "ELE", [],                          ""],
+      ["Certificación 3",                               "AP-CE3", "CER", [],                          ""]
+    ],
+    "s9": [
+      ["Compras públicas",                              "AP-901", "GES", ["AP-801","AP-802"],          ""],
+      ["Sistemas de información y procesos del estado", "AP-902", "GES", ["AP-804"],                  ""],
+      ["Seminario de titulación I",                     "AP-903", "POL", ["AP-803","AP-805","AP-703"],""]
+    ],
+    "s10": [
+      ["Práctica profesional",                          "AP-1001","GES", ["AP-901"],                  ""],
+      ["Seminario de titulación II",                    "AP-1002","POL", ["AP-903"],                  ""]
+    ]
+  }
+}
